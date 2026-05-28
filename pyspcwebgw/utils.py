@@ -14,12 +14,12 @@ def _load_enum(enum, value, default=None):
         return default
 
 
-async def async_request(session, url, **kwargs):
+async def async_request(session, url,auth=None, headers=None, **kwargs):
     """Do a web request and manage response."""
     try:
         async with asyncio.timeout(10):
             _LOGGER.debug("Sending %s to %s", kwargs, url)
-            response = await session(url, **kwargs)
+            response = await session(url, auth=auth, headers=headers,**kwargs)
         if response.status != 200:
             _LOGGER.error(
                 "HTTP status %d, response %s.", response.status, (await response.text())

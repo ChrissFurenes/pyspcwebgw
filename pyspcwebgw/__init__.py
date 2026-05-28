@@ -63,6 +63,7 @@ class SpcWebGateway:
             session=self._session,
             url=self._ws_url,
             async_callback=self._async_ws_handler,
+            auth=self._ws_auth
         )
         self._websocket.start()
 
