@@ -4,6 +4,9 @@ import asyncio
 import logging
 from urllib.parse import urljoin
 
+from aiohttp.web_middlewares import middleware
+from aiohttp import DigestAuthMiddleware
+
 from .area import Area
 from .const import AreaMode
 from .utils import async_request
@@ -16,12 +19,15 @@ _LOGGER = logging.getLogger(__name__)
 class SpcWebGateway:
     """Alarm system representation."""
 
-    def __init__(self, loop, session, api_url, ws_url, async_callback):
+    def __init__(self, loop, session, api_url, ws_url, async_callback, get_auth=None, put_auth=None, ws_auth=None):
         """Initialize the client."""
         self._loop = loop
         self._session = session
         self._api_url = api_url
         self._ws_url = ws_url
+        self._get_auth = get_auth
+        self._put_auth = put_auth
+        self._ws_auth = ws_auth
         self._info = None
         self._areas = {}
         self._zones = {}
@@ -49,6 +55,17 @@ class SpcWebGateway:
         """Retrieve all ethernet information."""
         return self._ethernet
 
+    @property
+    def auth_middleware(self):
+        return self._auth_middleware
+
+    @property
+    def user(self):
+        return self._user
+    @property
+    def pwd(self):
+        return self._pwd
+
     def start(self):
         """Connect websocket to SPC Web Gateway."""
         self._websocket = AIOWSClient(
@@ -56,6 +73,7 @@ class SpcWebGateway:
             session=self._session,
             url=self._ws_url,
             async_callback=self._async_ws_handler,
+            auth_middleware=self._auth_middleware,
         )
         self._websocket.start()
 
@@ -107,7 +125,7 @@ class SpcWebGateway:
             ),
         )
 
-        return await async_request(self._session.put, url)
+        return await async_request(self._session.put, url, auth=self._put_auth)
 
     async def _async_ws_handler(self, data):
         """Process incoming websocket message."""
@@ -157,7 +175,7 @@ class SpcWebGateway:
             url = urljoin(self._api_url, "spc/{}/{}".format(resource, id))
         else:
             url = urljoin(self._api_url, "spc/{}".format(resource))
-        data = await async_request(self._session.get, url)
+        data = await async_request(self._session.get, url, auth=self._get_auth)
         if not data:
             return False
         if id and isinstance(data["data"][resource], list):
