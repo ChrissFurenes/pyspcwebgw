@@ -55,16 +55,6 @@ class SpcWebGateway:
         """Retrieve all ethernet information."""
         return self._ethernet
 
-    @property
-    def auth_middleware(self):
-        return self._auth_middleware
-
-    @property
-    def user(self):
-        return self._user
-    @property
-    def pwd(self):
-        return self._pwd
 
     def start(self):
         """Connect websocket to SPC Web Gateway."""
@@ -73,7 +63,6 @@ class SpcWebGateway:
             session=self._session,
             url=self._ws_url,
             async_callback=self._async_ws_handler,
-            auth_middleware=self._auth_middleware,
         )
         self._websocket.start()
 
