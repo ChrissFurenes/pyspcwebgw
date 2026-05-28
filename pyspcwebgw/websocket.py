@@ -18,14 +18,13 @@ class AIOWSClient:
 
     """https://github.com/Kane610/deconz/blob/master/pydeconz/websocket.py"""
 
-    def __init__(self, loop, session, url, async_callback,auth=None, headers=None):
+    def __init__(self, loop, session, url, async_callback,auth=None):
         """Create resources for websocket communication."""
         self._loop = loop
         self._session = session
         self._url = url
         self._async_callback = async_callback
         self._auth = auth
-        self._headers = headers
         self._data = None
         self._state = None
         self._task = None
@@ -53,7 +52,7 @@ class AIOWSClient:
     async def running(self):
         """Start websocket connection."""
         try:
-            async with self._session.ws_connect(self._url, auth=self._auth, headers=self._headers) as ws:
+            async with self._session.ws_connect(self._url, auth=self._auth) as ws:
                 self.state = STATE_RUNNING
                 async for msg in ws:
                     if msg.type == aiohttp.WSMsgType.TEXT:

@@ -19,10 +19,11 @@ _LOGGER = logging.getLogger(__name__)
 class SpcWebGateway:
     """Alarm system representation."""
 
-    def __init__(self, loop, session, api_url, ws_url, async_callback, get_auth=None, put_auth=None, ws_auth=None):
+    def __init__(self, loop, session, api_url, ws_url, async_callback, get_auth=None, put_auth=None, ws_auth=None,put_session=None):
         """Initialize the client."""
         self._loop = loop
         self._session = session
+        self._put_session = put_session or session
         self._api_url = api_url
         self._ws_url = ws_url
         self._get_auth = get_auth
@@ -115,7 +116,7 @@ class SpcWebGateway:
             ),
         )
 
-        return await async_request(self._session.put, url, auth=self._put_auth)
+        return await async_request(self._put_session.put, url, auth=self._put_auth)
 
     async def _async_ws_handler(self, data):
         """Process incoming websocket message."""
